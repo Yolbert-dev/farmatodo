@@ -1,0 +1,8 @@
+POST http://localhost:3000/api/users
+Content-Type: application/json
+{
+  "id_codigo": 51951,
+  "password": "carteluo1$",
+  "name": "Yolbert Escobar",
+  "rol":"APV-Senior"
+}
