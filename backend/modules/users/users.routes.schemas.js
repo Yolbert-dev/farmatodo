@@ -1,5 +1,10 @@
 import { z } from 'zod/v4';
 
+const userIdSchema = z
+  .string()
+  .transform((val) => Number(val))
+  .refine((val) => !isNaN(val), 'El id tiene que ser un numero');
+
 export const createUserRouteSchema = {
   params: z.object({}),
   body: z.object({
@@ -10,5 +15,11 @@ export const createUserRouteSchema = {
     name: z.string('Debe ser un nombre valido'),
     rol: z.string('Debe ser un rol valido'),
   }),
+  queries: z.object({}),
+};
+
+export const deleteuserRouteSchema = {
+  params: z.object({ id: userIdSchema }),
+  body: z.object({}),
   queries: z.object({}),
 };

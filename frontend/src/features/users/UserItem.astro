@@ -1,0 +1,17 @@
+---
+const {id_codigo, name,rol} = Astro.props;
+import { Icon } from 'astro-icon/components';
+---
+<tr class="hover:bg-gray-50">
+            <td class="p-4"id={id_codigo}>{id_codigo}</td>
+            <td class="p-4">{name}</td>
+            <td class="p-4">{rol}</td>
+
+           <td class="p-4" id="deleteBtn">
+            <button class="delete-btn w-8 h-8 flex justify-center items-center text-gray-600 hover:text-red-600">
+              <Icon name="mdi:delete-outline" class="w-6 h-6" is:inline/>
+            </button> 
+          </td>
+          </tr>
+
+

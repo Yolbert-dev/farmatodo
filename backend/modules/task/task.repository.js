@@ -2,17 +2,25 @@ import db from '../../db/index.js';
 import { ErrorWithStatus } from '../../utils/errorTypes.js';
 
 const getAll = async () => {
-  const response = await db.query('SELECT * FROM contacts');
+  const response = await db.query('SELECT * FROM activity');
   return response.rows;
 };
 
 const addOne = async (payload) => {
   const response = await db.query(
     `
-    INSERT INTO contacts (name, phone)
-    VALUES ($1, $2) RETURNING *
+    INSERT INTO activity (title,description,img,responsible,activity_status,activity_type,user_id)
+    VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *
   `,
-    [payload.name, payload.phone],
+    [
+      payload.title,
+      payload.description,
+      payload.img,
+      payload.responsible,
+      payload.activity_status,
+      payload.activity_type,
+      payload.user_id,
+    ],
   );
   return response.rows[0];
 };

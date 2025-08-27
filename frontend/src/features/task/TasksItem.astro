@@ -1,0 +1,153 @@
+---
+import ky from "ky";
+import { BACK_ENDPOINT } from "../../config/endpoints";
+import Logo from"../../assets/logo.jpg";
+import TaskCompletedModal from"./TaskCompletedModal.astro"
+//api dayjs para manejar fecha y hora en utc
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+
+// Define the expected shape of a task
+type Task = {
+  title: string;
+  img: string;
+  responsible: string;
+  date: string;
+  activity_status: string;
+  activity_type: string;
+  description: string;
+};
+
+
+const taskData = await ky.get(`${BACK_ENDPOINT}/api/task`).json<Task[]>();
+
+---
+
+<div class="
+    sm:ml-8 md:ml-16  lg:ml-24 xl:ml-72
+    grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8  px-12">
+    {taskData.map(task => {
+      const statusClass = task.activity_status === 'En proceso' 
+        ? 'border-red-500' 
+        : 'border-green-500';
+       const formattedDate = dayjs.utc(task.date).tz("America/Caracas").format("DD/MM/YYYY HH:mm");
+
+      return (
+        <div 
+          class:list={[
+            "task-card bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transform hover:-translate-y-1.5 transition-all duration-300 border-t-4",
+            statusClass
+          ]}
+          data-title={task.title}
+          data-image={task.img}
+          data-responsible={task.responsible}
+          data-date={formattedDate}
+          data-status={task.activity_status}
+          data-type={task.activity_type}
+          data-description={task.description}
+        >
+          <img class="w-full h-40 object-contain" src={Logo.src} alt={`Imagen para ${task.title}`} />
+          
+          <div class="p-4 flex flex-col">
+            <h3 class="text-lg font-semibold text-gray-900 mb-3">{task.title}</h3>
+            <div class="text-sm text-gray-600 space-y-1">
+              <p><strong>Responsable:</strong> {task.responsible}</p>
+              <p class="text-xs text-gray-500"><strong>Creado:</strong> {formattedDate}</p>
+            </div>
+          </div>
+        </div>
+      )
+    })}
+  </div>
+
+    <!-- modal de las tareas  -->
+
+  <div id="taskDetailModal" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50 p-4 transition-opacity duration-300">
+    <div id="detailModalContent" class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-300">
+      <div class="flex justify-between items-center p-4 border-b">
+        <h2 id="modalTitle" class="text-2xl font-bold text-gray-900"></h2>
+        <button id="closeDetailModalBtn" class="text-gray-500 hover:text-gray-800 text-3xl font-light">&times;</button>
+      </div>
+      <div class="p-4 md:p-6">
+        <img id="modalImage" class="w-full h-64 object-cover rounded-lg mb-4" src={Logo.src} alt="Imagen de la tarea" />
+        <div class="flex flex-wrap justify-between items-start gap-4 mb-4">
+          <div class="text-gray-700">
+            <p><strong>Responsable:</strong> <span id="modalResponsible"></span></p>
+            <p><strong>Fecha de Creación:</strong> <span id="modalCreatedAt"></span></p>
+          </div>
+          <span id="modalStatus" class="px-3 py-1 text-sm font-bold rounded-full"></span>
+        </div>
+        <h4 class="font-semibold text-lg mb-2 text-gray-800">Descripción:</h4>
+        <p id="modalDescription" class="text-gray-600 whitespace-pre-wrap"></p>
+      </div>
+      <button id="markCompletedBtn" class="m-4 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">
+     Completar
+      </button>
+
+    </div>
+  </div>
+  <TaskCompletedModal/>
+  <script>
+    //@ts-nocheck
+     function showModal(modalElement, contentElement) {
+    modalElement.classList.remove('hidden');
+    modalElement.classList.add('flex');
+    setTimeout(() => {
+        modalElement.style.opacity = '1';
+        contentElement.style.transform = 'scale(1)';
+    }, 10);
+  }
+
+  // Función genérica para transiciones de cierre de modal
+  function hideModal(modalElement, contentElement) {
+      modalElement.style.opacity = '0';
+      contentElement.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        modalElement.classList.add('hidden');
+        modalElement.classList.remove('flex');
+    }, 300);
+  }
+
+ // --- 1. LÓGICA DEL MODAL DE DETALLES DE TAREA ---
+  const taskCards = document.querySelectorAll('.task-card');
+  const detailModal = document.getElementById('taskDetailModal');
+  const detailModalContent = document.getElementById('detailModalContent');
+  const closeDetailModalBtn = document.getElementById('closeDetailModalBtn');
+  
+  if(detailModal) {
+    // Rellenar y abrir el modal de detalles
+    taskCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const data = card.dataset;
+        document.getElementById('modalTitle').textContent = data.title;
+        document.getElementById('modalImage').src = data.image;
+        document.getElementById('modalResponsible').textContent = data.responsible;
+        document.getElementById('modalCreatedAt').textContent = data.date;
+        const statusEl = document.getElementById('modalStatus');
+        statusEl.textContent = data.status;
+        
+        statusEl.className = "px-3 py-1 text-sm font-bold rounded-full";
+        if (data.status === 'En proceso') {
+          statusEl.classList.add('bg-red-100', 'text-red-800');
+        } else {
+          statusEl.classList.add('bg-green-100', 'text-green-800');
+        }
+        document.getElementById('modalDescription').textContent = data.description;
+        
+        showModal(detailModal, detailModalContent);
+      });
+    });
+
+    // Eventos para cerrar el modal de detalles
+    closeDetailModalBtn.addEventListener('click', () => hideModal(detailModal, detailModalContent));
+    detailModal.addEventListener('click', (event) => {
+      if (event.target === detailModal) hideModal(detailModal, detailModalContent);
+    });
+  }
+
+
+  </script>

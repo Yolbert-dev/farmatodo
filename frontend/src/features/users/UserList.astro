@@ -1,0 +1,61 @@
+---
+import UserItem from "./UserItem.astro";
+import ky from "ky";
+import { BACK_ENDPOINT } from "../../config/endpoints";
+
+type User = {
+  id_codigo: string;
+  name: string;
+  rol: string;
+};
+
+const usersData = await ky.get(`${BACK_ENDPOINT}/api/users`).json<User[]>();
+---
+
+
+<div class="max-h-130 overflow-y-auto border border-gray-300 rounded-md shadow-md">
+  <table id="tableUser" class="min-w-full">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="p-4 text-left">ID</th>
+        <th class="p-4 text-left">Nombre</th>
+        <th class="p-4 text-left">Rol</th>
+      </tr>
+    </thead>
+    <tbody id="users-list">
+  {[...usersData]
+    .sort((a, b) => a.rol.localeCompare(b.rol))
+    .map(user => (
+      <UserItem 
+        key={user.id_codigo}
+        id_codigo={user.id_codigo}
+        name={user.name}
+        rol={user.rol}
+         
+      />
+      
+  ))}
+  
+</tbody>
+  </table>
+</div>
+      <script>
+import userModule from "./user.module";
+
+          // @ts-nocheck
+ const deleteBtn = document.querySelector('#deleteBtn')
+  
+    deleteBtn.addEventListener('click', async e => {
+      if (deleteBtn) {
+        // 1. Encuentro el li
+      const td =deleteBtn.parentElement.children[0];
+      
+        
+       
+        // 2. Actualizo el array en js, usando el metodo filter para devolver todos los contactos excepto el que quiero eliminar.
+        await userModule.removeUser(td.id);
+        location.reload();
+
+      }
+    });
+    </script>

@@ -1,0 +1,11 @@
+POST  http://localhost:3000/api/task
+Content-Type: application/json
+{
+  "title": "Limpiar comedor",
+  "description": "Limpieza de comedor y locker, sumado a la limpieza de las areas internas",
+  "img":"",
+  "responsible":"yolbert Escobar",
+  "activity_status":"proceso",
+  "activity_type":"Farmacia",
+  "user_id":51951
+}

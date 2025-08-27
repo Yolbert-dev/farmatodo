@@ -1,5 +1,5 @@
 import express from 'express';
-import contactsRouter from './modules/contacts/contacts.routes.js';
+import taskRouter from './modules/task/task.routes.js';
 import { ZodError } from 'zod/v4';
 import { ErrorWithStatus } from './utils/errorTypes.js';
 import { DatabaseError } from 'pg';
@@ -7,7 +7,7 @@ import cors from 'cors';
 import usersRouter from './modules/users/users.routes.js';
 import jwt from 'jsonwebtoken';
 import loginRoutes from './modules/login/login.routes.js';
-import { authenticateUser } from './modules/auth/auth.middleware.js';
+//import { authenticateUser } from './modules/auth/auth.middleware.js';
 import cookieParser from 'cookie-parser';
 const app = express();
 
@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
   res.json({ hola: 'mundo' });
 });
 
-app.use('/api/contacts', authenticateUser, contactsRouter);
+app.use('/api/task', taskRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/login', loginRoutes);
 

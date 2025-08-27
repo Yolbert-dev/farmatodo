@@ -1,0 +1,98 @@
+
+<div id="addTaskModal" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50 p-4 transition-opacity duration-300">
+  <div id="addModalContent" class="bg-white rounded-lg shadow-xl w-full max-w-3xl transform scale-95 transition-transform duration-300">
+    <form id="addTaskForm" novalidate>
+      <div class="flex justify-between items-center p-4 border-b">
+        <h2 class="text-2xl font-bold text-gray-900">Añadir Nueva Tarea</h2>
+        <button type="button" id="closeAddTaskModalBtn" class="text-gray-500 hover:text-gray-800 text-3xl font-light">&times;</button>
+      </div>
+    <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+      <div>
+        <label for="taskTitle" class="block text-sm font-medium text-gray-700">Título de la Tarea</label>
+        <input type="text" id="taskTitle" name="title" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+      </div>
+      <div>
+        <label for="taskResponsible" class="block text-sm font-medium text-gray-700">Responsable</label>
+        <input type="text" id="taskResponsible" name="responsible" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+      </div>
+      <div>
+        <label for="taskDescription" class="block text-sm font-medium text-gray-700">Descripción</label>
+        <textarea id="taskDescription" name="description" rows="4" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required></textarea>
+      </div>
+      <div>
+        <label for="taskStatus" class="block text-sm font-medium text-gray-700">Estado</label>
+        <select id="taskStatus" name="status" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+          <option>En proceso</option>
+        </select>
+      </div>
+      <div>
+        <label for="roltask" class="block text-sm font-medium text-gray-700">Rol</label>
+        <select id="roltask" name="status" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+          <option>Farmacia</option>
+          <option>Miscelaneos</option>
+        </select>
+      </div>
+      <div>
+        <label for="taskImage" class="block text-sm font-medium text-gray-700">URL de la Imagen (Opcional)</label>
+        <input type="text" id="taskImage" name="image" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+      </div>
+    </div>
+    <div class="flex justify-end items-center p-4 bg-gray-50 border-t rounded-b-lg gap-3">
+      <button type="button" id="cancelAddTaskBtn" class="bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors">Cancelar</button>
+      <button type="submit" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">Guardar Tarea</button>
+    </div>
+  </form>
+</div>
+
+</div>
+
+<script>
+//@ts-nocheck
+// //modulos
+import taskModule from "./task.module";
+//IDENTIFICADOR DE INPUTS
+const titleTask = document.querySelector('#taskTitle');
+const taskResponsible = document.querySelector('#taskResponsible');
+const taskDescription = document.querySelector('#taskDescription');
+const taskStatus = document.querySelector('#taskStatus');
+const taskrol = document.querySelector('#roltask');
+const taskimg = document.querySelector('#taskImage')
+//funciones modal
+function showModal(modalElement, contentElement) 
+{modalElement.classList.remove('hidden');modalElement.classList.add('flex');setTimeout(() => {
+  modalElement.style.opacity = '1';contentElement.style.transform = 'scale(1)';}, 10);}
+  // Función genérica para transiciones de cierre de modal
+  function hideModal(modalElement, contentElement) 
+  {modalElement.style.opacity = '0';contentElement.style.transform = 'scale(0.95)';setTimeout(() => 
+  {modalElement.classList.add('hidden');modalElement.classList.remove('flex');}, 300);}
+  // --- 2. LÓGICA DEL MODAL DE AÑADIR TAREA ---
+  const openAddTaskModalBtn = document.getElementById('openAddTaskModalBtn');
+  const addTaskModal = document.getElementById('addTaskModal');
+  const addModalContent = document.getElementById('addModalContent');
+  const closeAddTaskModalBtn = document.getElementById('closeAddTaskModalBtn');
+  const cancelAddTaskBtn = document.getElementById('cancelAddTaskBtn');
+  const addTaskForm = document.getElementById('addTaskForm');if(addTaskModal) {
+    // Eventos para abrir y cerrar el modal del formulario
+    openAddTaskModalBtn.addEventListener('click', () => showModal(addTaskModal, addModalContent));
+    closeAddTaskModalBtn.addEventListener('click', () => hideModal(addTaskModal, addModalContent));
+    cancelAddTaskBtn.addEventListener('click', () => hideModal(addTaskModal, addModalContent));
+    addTaskModal.addEventListener('click', (event) => {if (event.target === addTaskModal) hideModal(addTaskModal, addModalContent);});
+    // Manejar el envío del formulario
+    addTaskForm.addEventListener('submit',async (e) => {e.preventDefault(); 
+      // Evita que la página se recargue
+      const formData = new FormData(addTaskForm);const taskData = Object.fromEntries(formData.entries());
+      // Aquí iría tu lógica para guardar la tarea (ej: enviar a una API)
+      await taskModule.addtask({
+        title: titleTask.value,
+        description: taskDescription.value,
+        img: taskimg.value,
+        responsible: taskResponsible.value,
+        activity_status: taskStatus.value,
+        activity_type: taskrol.value,
+        user_id: 51951});
+        addTaskForm.reset(); 
+        // Limpia el formulario
+        hideModal(addTaskModal, addModalContent); 
+        // Cierra el modal
+        });}
+        </script>
