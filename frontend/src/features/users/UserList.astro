@@ -43,19 +43,20 @@ const usersData = await ky.get(`${BACK_ENDPOINT}/api/users`).json<User[]>();
 import userModule from "./user.module";
 
           // @ts-nocheck
- const deleteBtn = document.querySelector('#deleteBtn')
-  
-    deleteBtn.addEventListener('click', async e => {
-      if (deleteBtn) {
-        // 1. Encuentro el li
-      const td =deleteBtn.parentElement.children[0];
-      
-        
-       
-        // 2. Actualizo el array en js, usando el metodo filter para devolver todos los contactos excepto el que quiero eliminar.
-        await userModule.removeUser(td.id);
-        location.reload();
+ document.querySelector("#users-list").addEventListener("click", async (e) => {
+  const btn = (e.target as Element)?.closest(".delete-btn");
+  if (!btn) return;
 
-      }
-    });
+  const id = btn.getAttribute("data-id");
+  if (!id) return;
+
+  try {
+    await userModule.removeUser(id);
+    location.reload(); // o fetchData() si prefieres evitar recarga completa
+  } catch (err) {
+    console.error("Error al eliminar usuario:", err);
+    alert("No se pudo eliminar el usuario.");
+  }
+});
+
     </script>

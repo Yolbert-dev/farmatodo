@@ -109,9 +109,16 @@ const taskData = await ky.get(`${BACK_ENDPOINT}/api/task`).json<Task[]>();
         <h4 class="font-semibold text-lg mb-2 text-gray-800">Descripción:</h4>
         <p id="modalDescription" class="text-gray-600 whitespace-pre-wrap"></p>
       </div>
+
+      
       <button id="markCompletedBtn" class="m-4 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">
-     Completar
+        Completar
       </button>
+      <div id="completedActivityBox" class="p-4 md:p-6 border-t mt-4 hidden">
+  <h4 class="font-semibold text-lg mb-2 text-gray-800">Actividad Completada:</h4>
+  <img id="completedImage" class="w-full h-64 object-cover rounded-lg mb-4" src="" alt="Imagen de actividad completada" />
+  <p id="completedDescription" class="text-gray-600 whitespace-pre-wrap"></p>
+</div>
 
     </div>
   </div>
@@ -121,6 +128,8 @@ const taskData = await ky.get(`${BACK_ENDPOINT}/api/task`).json<Task[]>();
 
   <script>
     //@ts-nocheck
+    import ky from "ky";
+    import { BACK_ENDPOINT } from "../../config/endpoints";
      function showModal(modalElement, contentElement) {
     modalElement.classList.remove('hidden');
     modalElement.classList.add('flex');
@@ -170,8 +179,39 @@ const taskData = await ky.get(`${BACK_ENDPOINT}/api/task`).json<Task[]>();
           statusEl.classList.add('bg-green-100', 'text-green-800');
         }
         document.getElementById('modalDescription').textContent = data.description;
-        
-        showModal(detailModal, detailModalContent);
+        const completedBox = document.getElementById('completedActivityBox');
+const completedImage = document.getElementById('completedImage');
+const completedDescription = document.getElementById('completedDescription');
+const isCompleted = data.status.toLowerCase() === 'completado';
+// ✅ Abre el modal primero
+showModal(detailModal, detailModalContent);
+
+
+if (isCompleted) {
+  completedBox.style.display = 'block';
+
+  ky.get(`${BACK_ENDPOINT}/api/taskCompleted/${activityId}`)
+    .json()
+    .then(dataCompleted => {
+        console.log("Datos completados recibidos:", dataCompleted);
+
+      completedImage.src = dataCompleted.img || Logo.src;
+      completedDescription.textContent = dataCompleted.description || "Sin descripción disponible.";
+    })
+    .catch(err => {
+      console.error("Error al obtener datos de actividad completada:", err);
+      completedImage.src = Logo.src;
+      completedDescription.textContent = "No se pudo cargar la información completada.";
+    });
+} else {
+  completedBox.style.display = 'none';
+}
+
+// ✅ Esto debe ir fuera del bloque para que el modal se abra siempre
+
+
+
+    
         // Dentro de tu listener de card.click, tras renderizar el resto:
 const completeBtn = document.getElementById('markCompletedBtn');
 
@@ -217,5 +257,7 @@ applyFiltersBtn.addEventListener('click', applyFilters);
 // Opcional: aplicar filtros automáticamente al cambiar los selectores
 filterStatus.addEventListener('change', applyFilters);
 filterType.addEventListener('change', applyFilters);
+
+
 
   </script>

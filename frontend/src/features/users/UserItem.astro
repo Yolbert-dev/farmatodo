@@ -7,10 +7,12 @@ import { Icon } from 'astro-icon/components';
             <td class="p-4">{name}</td>
             <td class="p-4">{rol}</td>
 
-           <td class="p-4" id="deleteBtn">
-            <button class="delete-btn w-8 h-8 flex justify-center items-center text-gray-600 hover:text-red-600">
-              <Icon name="mdi:delete-outline" class="w-6 h-6" is:inline/>
-            </button> 
+           <td class="p-4">
+  <button class="delete-btn w-8 h-8 flex justify-center items-center text-gray-600 hover:text-red-600" data-id={id_codigo}>
+    <Icon name="mdi:delete-outline" class="w-6 h-6" is:inline />
+  </button>
+</td>
+
           </td>
           </tr>
 

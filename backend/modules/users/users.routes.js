@@ -54,7 +54,7 @@ usersRouter.delete('/:id', async (req, res) => {
   const params = deleteuserRouteSchema.params.parse(req.params);
   console.log('PARAMS', params);
   const userDeleted = await usersRepository.deleteOneById(params.id);
-  console.log('CONTACTO ELIMINADO', userDeleted);
+  console.log('USUARIO ELIMINADO', userDeleted);
 
   res.json(userDeleted);
 });

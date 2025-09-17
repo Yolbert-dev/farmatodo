@@ -7,10 +7,19 @@ import {
 } from './taskCompleted.routes.schemas.js';
 const taskCompletedRouter = express.Router();
 
-taskCompletedRouter.get('/', async (req, res) => {
-  const task = await taskCompletedRepository.getAll();
+taskCompletedRouter.get('/:id', async (req, res) => {
+  const { id } = req.params;
+  const allTasks = await taskCompletedRepository.getAll();
+
+  const task = allTasks.find((t) => String(t.id) === String(id));
+
+  if (!task) {
+    return res.status(404).json({ error: 'Actividad completada no encontrada' });
+  }
+
   res.json(task);
 });
+
 taskCompletedRouter.get('/count', async (req, res) => {
   try {
     // 1. Llama a la nueva función del repositorio
