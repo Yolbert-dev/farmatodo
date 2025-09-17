@@ -10,3 +10,7 @@ export const taskSchema = z.object({
   activity_type: z.string(),
   user_id: z.number(),
 });
+export const statusUpdateSchema = z.object({
+  id: z.number(),
+  activity_status: z.string(),
+});

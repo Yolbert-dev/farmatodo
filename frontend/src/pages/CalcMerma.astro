@@ -1,0 +1,69 @@
+<!-- Modal oculto por defecto -->
+<div id="mermaModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 relative">
+    <!-- Botón de cerrar -->
+    <button id="closeModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">
+      &times;
+    </button>
+
+    <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">Calculadora de Merma</h2>
+
+    <div class="space-y-4">
+      <div>
+        <label for="ajuste" class="block text-sm font-medium text-gray-700">Ajustes</label>
+        <input type="number" id="ajuste" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="Ingrese ajustes">
+      </div>
+
+      <div>
+        <label for="venta" class="block text-sm font-medium text-gray-700">Ventas</label>
+        <input type="number" id="venta" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="Ingrese ventas">
+      </div>
+
+      <div class="text-center">
+        <p class="text-lg font-medium text-gray-700">Merma: <span id="resultado" class="text-blue-600 font-bold">0%</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+//@ts-nocheck
+// merma.js
+document.addEventListener('DOMContentLoaded', () => {
+  const openModalBtn = document.getElementById('openModal');
+  const closeModalBtn = document.getElementById('closeModal');
+  const modal = document.getElementById('mermaModal');
+
+  const ajusteInput = document.getElementById('ajuste');
+  const ventaInput = document.getElementById('venta');
+  const resultadoSpan = document.getElementById('resultado');
+
+  // Mostrar modal
+  openModalBtn.addEventListener('click', () => {
+    modal.classList.remove('hidden');
+  });
+
+  // Ocultar modal
+  closeModalBtn.addEventListener('click', () => {
+    modal.classList.add('hidden');
+  });
+
+  // Calcular merma dinámicamente
+  function calcularMerma() {
+    const ajuste = parseFloat(ajusteInput.value);
+    const venta = parseFloat(ventaInput.value);
+
+    if (!isNaN(ajuste) && !isNaN(venta) && venta !== 0) {
+      const merma = (ajuste / venta) * 100;
+      resultadoSpan.textContent = `${merma.toFixed(2)}%`;
+    } else {
+      resultadoSpan.textContent = '0%';
+    }
+  }
+
+  ajusteInput.addEventListener('input', calcularMerma);
+  ventaInput.addEventListener('input', calcularMerma);
+});
+
+</script>

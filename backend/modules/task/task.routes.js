@@ -11,6 +11,18 @@ taskRouter.get('/', async (req, res) => {
   const task = await taskRepository.getAll();
   res.json(task);
 });
+taskRouter.get('/count', async (req, res) => {
+  try {
+    // 1. Llama a la nueva función del repositorio
+    const count = await taskRepository.countAll();
+
+    // 2. Devuelve el conteo en el formato JSON esperado por el frontend
+    res.json({ count: count });
+  } catch (error) {
+    console.error('Error al contar usuarios:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+});
 
 taskRouter.post('/', async (req, res) => {
   const body = createtaskRouteSchema.body.parse(req.body);

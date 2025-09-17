@@ -2,7 +2,7 @@
 import ky from "ky";
 import { BACK_ENDPOINT } from "../../config/endpoints";
 import Logo from"../../assets/logo.jpg";
-import TaskCompletedModal from"./TaskCompletedModal.astro"
+import TaskCompletedModal from"./taskCompleted/TaskCompletedModal.astro"
 //api dayjs para manejar fecha y hora en utc
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -13,6 +13,7 @@ dayjs.extend(timezone);
 
 // Define the expected shape of a task
 type Task = {
+  id:number;
   title: string;
   img: string;
   responsible: string;
@@ -26,7 +27,26 @@ type Task = {
 const taskData = await ky.get(`${BACK_ENDPOINT}/api/task`).json<Task[]>();
 
 ---
+<div class=" sm:ml-8 md:ml-16  lg:ml-24 xl:ml-72 flex flex-wrap gap-4 mb-6 px-12">
+  <select id="filterStatus" class="border rounded px-6 py-2">
+    <option value="">Todos los estados</option>
+    <option value="En proceso">En proceso</option>
+    <option value="completado">Completado</option>
+  </select>
 
+  <select id="filterType" class="border rounded px-6 py-2">
+    <option value="">Todos los tipos</option>
+    <option value="Farmacia">Farmacia</option>
+    <option value="Miscelaneos">Miscelaneos</option>
+    <option value="Miscelaneos">Administrativo</option>
+    <!-- Agrega más tipos si los tienes -->
+  </select>
+
+  <button id="applyFiltersBtn" class="hidden bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+    Filtrar
+  </button>
+
+</div> 
 <div class="
     sm:ml-8 md:ml-16  lg:ml-24 xl:ml-72
     grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8  px-12">
@@ -42,6 +62,7 @@ const taskData = await ky.get(`${BACK_ENDPOINT}/api/task`).json<Task[]>();
             "task-card bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transform hover:-translate-y-1.5 transition-all duration-300 border-t-4",
             statusClass
           ]}
+          data-id={task.id}
           data-title={task.title}
           data-image={task.img}
           data-responsible={task.responsible}
@@ -57,6 +78,7 @@ const taskData = await ky.get(`${BACK_ENDPOINT}/api/task`).json<Task[]>();
             <div class="text-sm text-gray-600 space-y-1">
               <p><strong>Responsable:</strong> {task.responsible}</p>
               <p class="text-xs text-gray-500"><strong>Creado:</strong> {formattedDate}</p>
+              <p class="text-xs text-gray-500"><strong>Tipo:</strong> {task.activity_type}</p>
             </div>
           </div>
         </div>
@@ -72,6 +94,9 @@ const taskData = await ky.get(`${BACK_ENDPOINT}/api/task`).json<Task[]>();
         <h2 id="modalTitle" class="text-2xl font-bold text-gray-900"></h2>
         <button id="closeDetailModalBtn" class="text-gray-500 hover:text-gray-800 text-3xl font-light">&times;</button>
       </div>
+      <div id="detailModalContent" class="...">
+    <input type="hidden" id="modalActivityId" value="">
+</div>
       <div class="p-4 md:p-6">
         <img id="modalImage" class="w-full h-64 object-cover rounded-lg mb-4" src={Logo.src} alt="Imagen de la tarea" />
         <div class="flex flex-wrap justify-between items-start gap-4 mb-4">
@@ -90,7 +115,10 @@ const taskData = await ky.get(`${BACK_ENDPOINT}/api/task`).json<Task[]>();
 
     </div>
   </div>
+
   <TaskCompletedModal/>
+
+
   <script>
     //@ts-nocheck
      function showModal(modalElement, contentElement) {
@@ -123,6 +151,11 @@ const taskData = await ky.get(`${BACK_ENDPOINT}/api/task`).json<Task[]>();
     taskCards.forEach(card => {
       card.addEventListener('click', () => {
         const data = card.dataset;
+        // 1. Captura el ID desde el data-id
+        const activityId = data.id; 
+        
+        // 2. Guárdalo en el input oculto del modal
+        document.getElementById('modalActivityId').value = activityId;      
         document.getElementById('modalTitle').textContent = data.title;
         document.getElementById('modalImage').src = data.image;
         document.getElementById('modalResponsible').textContent = data.responsible;
@@ -139,6 +172,18 @@ const taskData = await ky.get(`${BACK_ENDPOINT}/api/task`).json<Task[]>();
         document.getElementById('modalDescription').textContent = data.description;
         
         showModal(detailModal, detailModalContent);
+        // Dentro de tu listener de card.click, tras renderizar el resto:
+const completeBtn = document.getElementById('markCompletedBtn');
+
+// Ocultamos o mostramos el botón según el status
+if (data.status.toLowerCase() === 'completado' ) {
+  completeBtn.style.display = 'none';
+} else {
+  completeBtn.style.display = ''; // vuelve a su valor por defecto
+}
+
+// Luego abres el modal
+showModal(detailModal, detailModalContent);
       });
     });
 
@@ -148,6 +193,29 @@ const taskData = await ky.get(`${BACK_ENDPOINT}/api/task`).json<Task[]>();
       if (event.target === detailModal) hideModal(detailModal, detailModalContent);
     });
   }
+const filterStatus = document.getElementById('filterStatus');
+const filterType = document.getElementById('filterType');
+const applyFiltersBtn = document.getElementById('applyFiltersBtn');
 
+function applyFilters() {
+  const selectedStatus = filterStatus.value;
+  const selectedType = filterType.value;
+
+  taskCards.forEach(card => {
+    const cardStatus = card.dataset.status;
+    const cardType = card.dataset.type;
+
+    const matchesStatus = selectedStatus === '' || cardStatus === selectedStatus;
+    const matchesType = selectedType === '' || cardType === selectedType;
+
+    card.style.display = (matchesStatus && matchesType) ? '' : 'none';
+  });
+}
+
+applyFiltersBtn.addEventListener('click', applyFilters);
+
+// Opcional: aplicar filtros automáticamente al cambiar los selectores
+filterStatus.addEventListener('change', applyFilters);
+filterType.addEventListener('change', applyFilters);
 
   </script>

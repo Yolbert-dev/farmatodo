@@ -1,0 +1,7 @@
+PUT  http://localhost:3000/api/task/2
+Content-Type: application/json
+{
+ 
+  "activity_status":"completado"
+
+}

@@ -2,7 +2,7 @@ import { atom } from "nanostores";
 import { createNotification } from "../notifications/notificiation.js";
 import { BACK_ENDPOINT } from "../../config/endpoints.js";
 import ky from "ky";
-const BASE_URL = `${BACK_ENDPOINT}/api/task`;
+const BASE_URL = `${BACK_ENDPOINT}/api/incidence`;
 
 /** 
   * @typedef Contact
@@ -12,27 +12,28 @@ const BASE_URL = `${BACK_ENDPOINT}/api/task`;
   * @property {string} phone El numero del contacto
 */
 
-/** @type {task[]} */
-let taskArray = [];
-export const task = atom(taskArray);
+/** @type {incidence[]} */
+let incidenceArray = [];
+export const incidence = atom(incidenceArray);
 
 /** 
   * Agrega un usuario.
-  * @param {object} taskToCreate la tarea nueva
+  * @param {object} incidence El nuevo usuario
 */
 
-const addtask = async (taskToCreate) => {
+const addUser = async (incidence) => {
      try {
-      await ky.post(BASE_URL, {json:taskToCreate,credentials: 'include'});
+      await ky.post(BASE_URL, {json:incidence,credentials: 'include'});
       // Reinciar todos los estados del formulario
       
       createNotification({ 
-        title: 'Actividad creada!', 
+        title: 'incidencia creada!', 
         type: 'success'
       });
       
     // cerrar el modal después de guardar
-        location.reload();
+       document.getElementById('modal').classList.add('hidden');
+       location.reload();
 
     } catch (error) {
       const errorData = await error?.response?.json();
@@ -45,20 +46,17 @@ const addtask = async (taskToCreate) => {
       });
     } 
   }
-const updatetask = async (taskToCreate) => {
-  const url = `${BASE_URL}/${taskToCreate.id}`;
+  /**
+  * Elimina un contacto
+  * @param {string} id El id del contacto a eliminar
+*/
+const removeUser = async (id) => {
+  const url = `${BASE_URL}/${id}`;
   try {
-    const taskUpdated = await ky.put(url, {json: taskToCreate,credentials: 'include'}).json();
-    task.set(task.get().map(t => {
-      if (t.id === taskUpdated.id) {
-        return taskUpdated;
-      } else {
-        return t;
-      }
-    }));
-     createNotification({
-      title: 'Actividad actualizada',
-      description: `${taskUpdated.name}`,
+    const incidenceDeleted = await ky.delete(url,{credentials: 'include'}).json();
+    createNotification({
+      title: 'incidencia eliminada',
+      description: `${incidenceDeleted.type}`,
       type: 'success'
     });
   } catch (error) {
@@ -72,7 +70,10 @@ const updatetask = async (taskToCreate) => {
   }
 }
 
-  
+
+
 export default {
-  addtask,updatetask
+  addUser,
+  removeUser
+
 }

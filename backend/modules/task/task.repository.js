@@ -42,19 +42,37 @@ const deleteOneById = async (id) => {
 const updateOneById = async (id, payload) => {
   const response = await db.query(
     `
-    UPDATE contacts
-    SET name = $1, phone = $2
-    WHERE id = $3
+    UPDATE activity
+    SET 
+    activity_status = $1
+    WHERE id = $2
     RETURNING *
   `,
-    [payload.name, payload.phone, id],
+    [payload.activity_status, id],
   );
   if (response.rowCount === 0) {
-    throw new ErrorWithStatus(404, 'El contacto fue no encontrado');
+    throw new ErrorWithStatus(404, 'La actividad no fue encontrado');
   }
   return response.rows[0];
 };
+const countAll = async () => {
+  try {
+    const response = await db.query(
+      `SELECT COUNT(*) AS total
+         FROM activity
+        WHERE activity_status = $1`,
+      ['En proceso'],
+    );
 
-const contactsRepository = { getAll, addOne, deleteOneById, updateOneById };
+    const count = parseInt(response.rows[0].total, 10);
+    return count;
+  } catch (error) {
+    console.error('Error en el repositorio al contar actividades en proceso:', error);
+    throw new Error(
+      'No se pudo obtener el conteo de actividades en proceso desde la base de datos.',
+    );
+  }
+};
+const taskRepository = { getAll, addOne, deleteOneById, updateOneById, countAll };
 
-export default contactsRepository;
+export default taskRepository;

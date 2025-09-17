@@ -13,6 +13,7 @@ const menuItems = [
   { label: 'Inicio', href: '/' },
   { label: 'Actividades', href: '/listTasks' },
   { label: 'Usuarios', href: '/users' },
+  { label: 'Incidencias', href: '/incidence' },
 ];
 ---
 
@@ -61,7 +62,7 @@ const menuItems = [
       class="hidden absolute right-0 mt-2 w-44 bg-white text-gray-900 rounded-md shadow-lg overflow-hidden z-40"
     >
       <a href="/perfil" class="block px-4 py-2 hover:bg-gray-100">Mi Perfil</a>
-      <a href="/logout" class="block px-4 py-2 hover:bg-gray-100">Cerrar Sesión</a>
+      <a href="#" id="logout"  class="block px-4 py-2 hover:bg-gray-100">Cerrar Sesión</a>
     </div>
   </div>
 </header>
@@ -106,6 +107,9 @@ const menuItems = [
 
 
 <script>
+  import {BACK_ENDPOINT} from "../config/endpoints.js"
+  import ky from "ky";
+  import AuthModule from "../features/auth/auth.module"
   // Script sin cambios
   //@ts-nocheck
   const sidebar   = document.getElementById('sidebar');
@@ -138,10 +142,33 @@ const menuItems = [
   }
   
   document.addEventListener('click', (event) => {
-    if (userToggle && !userToggle.contains(event.target) && userDropdown && !userDropdown.contains(event.target)) {
+    if (
+      userToggle &&
+      !userToggle.contains(event.target as Node) &&
+      userDropdown &&
+      !userDropdown.contains(event.target as Node)
+    ) {
       userDropdown.classList.add('hidden');
     }
   });
+
+  document.addEventListener('DOMContentLoaded', () => {
+  const logoutBtn = document.getElementById('logout');
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async (e) => {
+      e.preventDefault(); // Evita navegación por defecto
+
+      try {
+        await AuthModule.logoutUser();
+        window.location.href = '/login'; // Redirige al login tras cerrar sesión
+      } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+        alert('No se pudo cerrar sesión. Intenta nuevamente.');
+      }
+    });
+  }
+});
 </script>
 
 </body>

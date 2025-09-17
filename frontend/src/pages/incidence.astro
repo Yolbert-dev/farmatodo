@@ -1,11 +1,11 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import AuthProtected from "../features/auth/AuthProtected.astro";
-import UserList from "../features/users/UserList.astro";
-import UserModalAdd from "../features/users/UserModalAdd.astro";
+import UserList from "../features/incidence/IncidenceList.astro";
+import IncidenceModalAdd from "../features/incidence/IncidenceModalAdd.astro";
 ---
 
-<Layout title="Users">
+<Layout title="Incidence">
   <AuthProtected>
   <div class="max-w-4xl mx-auto px-4 pt-20 pb-8">
     <!-- Botón alineado arriba–derecha -->
@@ -14,7 +14,7 @@ import UserModalAdd from "../features/users/UserModalAdd.astro";
         onclick="document.getElementById('modal').classList.remove('hidden')"
         class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded shadow"
       >
-        Añadir usuario
+        Añadir Inidencia
       </button>
     </div>
 
@@ -25,7 +25,7 @@ import UserModalAdd from "../features/users/UserModalAdd.astro";
   </div>
 
   <!-- Modal -->
- <UserModalAdd/>
+ <IncidenceModalAdd/>
  </AuthProtected>
 </Layout>
 

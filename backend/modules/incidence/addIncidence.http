@@ -1,0 +1,10 @@
+POST  http://localhost:3000/api/incidence
+Content-Type: application/json
+{
+  "description": "Diferencia no registrado en sistema ",
+  "type":"Diferencia Contable",
+  "till":"1",
+  "monto":"800",
+  "transsacion":"12341",
+  "user_id":51951
+}

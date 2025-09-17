@@ -23,7 +23,7 @@ export const users = atom(userArray);
 
 const addUser = async (UserToCreate) => {
      try {
-      await ky.post(BASE_URL, {json:UserToCreate});
+      await ky.post(BASE_URL, {json:UserToCreate,credentials: 'include'});
       // Reinciar todos los estados del formulario
       
       createNotification({ 
@@ -53,7 +53,7 @@ const addUser = async (UserToCreate) => {
 const removeUser = async (id) => {
   const url = `${BASE_URL}/${id}`;
   try {
-    const contactDeleted = await ky.delete(url).json();
+    const contactDeleted = await ky.delete(url,{credentials: 'include'}).json();
     createNotification({
       title: 'Usuario eliminado',
       description: `${contactDeleted.name}`,

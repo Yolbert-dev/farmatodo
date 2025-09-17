@@ -1,0 +1,153 @@
+<div
+  id="modal"
+  class="hidden fixed inset-0 flex items-center justify-center bg-white bg-opacity-30 backdrop-blur-sm"
+>
+  <div class="bg-gradient-to-br from-white to-gray-100 p-8 rounded-xl shadow-2xl w-full max-w-md border border-gray-200">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Añadir Incidencia</h2>
+    <!-- Se añadió un ID al formulario -->
+    <form id="user-form" class="space-y-4">
+      <input
+        id="description"
+        type="text"
+        placeholder="Descripción"
+        class="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
+      />
+      <input
+        id="transsacion"
+        type="text"
+        placeholder="Nº Transsaciòn"
+        class="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
+      />
+      <input
+        id="till"
+        type="text"
+        placeholder="Nº Caja Registradora"
+        class="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
+      />
+      <select
+        id="type"
+        class="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
+      >
+        <option value="Pago-Movil">Pago-Movil</option>
+        <option value="Diferencia-Contable">Diferencia-Contable</option>
+        <option value="Monto-Debitado">Monto-Debitado</option>
+        <option value="Biopago">Biopago</option>
+      </select>
+      <input
+        id="monto"
+        type="text"
+        placeholder="Monto" 
+        class="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
+      />
+      <div class="flex justify-end space-x-3 pt-2">
+        <button
+          type="button"
+          onclick="document.getElementById('modal').classList.add('hidden')"
+          class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+        >
+          Cancelar
+        </button>
+        <button
+          id="submitButton"
+          type="submit"
+          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-transform transform hover:scale-105"
+        >
+          Guardar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+//@ts-nocheck
+
+//modulos
+
+    import { BACK_ENDPOINT } from "../../config/endpoints";
+    import { createNotification } from "../notifications/notificiation";
+    import ky from 'ky';
+    import moduleIncidence from "./incidence.module"
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    
+   
+    // Seleccionamos cada elemento del formulario por su ID para poder manipularlo.
+    const form = document.querySelector('#user-form');
+    const userIdInput = document.querySelector('#description');
+    const userNameInput = document.querySelector('#transsacion');
+    const till = document.querySelector('#till');
+    const userPasswordInput = document.querySelector('#monto');
+    const userRoleInput = document.querySelector('#type');
+    const submitButton = document.querySelector('#submitButton');
+
+    // Agrupamos los campos que necesitan validación (todos excepto el select que siempre tiene un valor)
+    const fieldsToValidate = [userIdInput, userNameInput, userPasswordInput,till];
+
+    // --- 2. FUNCIÓN DE VALIDACIÓN ---
+    // Esta función se ejecutará cada vez que el usuario escriba en un campo.
+    const validateForm = () => {
+      let isFormValid = true;
+
+      // Recorremos cada campo para validar si está vacío o no.
+      fieldsToValidate.forEach(input => {
+        // Usamos .trim() para eliminar espacios en blanco al inicio y al final.
+        if (input.value.trim() === '') {
+          // Si el campo está vacío:
+          isFormValid = false;
+          // Cambiamos el color del borde a rojo para indicar un error.
+          input.classList.remove('border-green-500', 'focus:ring-green-500');
+          input.classList.add('border-red-500', 'focus:ring-red-500');
+        } else {
+          // Si el campo está lleno:
+          // Cambiamos el color del borde a verde para indicar que es válido.
+          input.classList.remove('border-red-500', 'focus:ring-red-500');
+          input.classList.add('border-green-500', 'focus:ring-green-500');
+        }
+      });
+
+      // --- 3. HABILITAR O DESHABILITAR EL BOTÓN ---
+      if (isFormValid) {
+        // Si todos los campos son válidos, habilitamos el botón.
+        submitButton.disabled = false;
+        // Le quitamos las clases que lo hacen parecer deshabilitado.
+        submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+      } else {
+        // Si algún campo no es válido, deshabilitamos el botón.
+        submitButton.disabled = true;
+        // Le añadimos clases para que se vea gris y el cursor no cambie.
+        submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+      }
+    };
+
+    // --- 4. AÑADIR EVENT LISTENERS ---
+    // Añadimos un "escuchador" a cada campo para que la función de validación
+    // se ejecute en tiempo real mientras el usuario escribe.
+    fieldsToValidate.forEach(input => {
+      input.addEventListener('input', validateForm);
+    });
+
+    // --- 5. ESTADO INICIAL ---
+    // Ejecutamos la función una vez al cargar la página para asegurarnos
+    // de que el botón esté deshabilitado desde el principio.
+    validateForm();
+
+    // Opcional: Manejar el envío del formulario
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Previene que la página se recargue
+
+      await moduleIncidence.addUser({
+        description: userIdInput.value, 
+        type: userRoleInput.value,
+        till: till.value, 
+        monto: userPasswordInput.value, 
+        transsacion: userNameInput.value,
+        user_id:51951
+      })
+      form.reset();
+      
+    });
+  });
+
+
+
+</script>

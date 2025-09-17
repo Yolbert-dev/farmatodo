@@ -1,5 +1,6 @@
 import { z } from 'zod/v4';
 import { taskSchema } from './task.schemas.js';
+import { statusUpdateSchema } from './task.schemas.js';
 
 const taskIdSchema = z
   .string()
@@ -20,6 +21,6 @@ export const deletetaskRouteSchema = {
 
 export const updatetaskRouteSchema = {
   params: z.object({ id: taskIdSchema }),
-  body: taskSchema.omit({ id: true }),
+  body: statusUpdateSchema.omit({ id: true }),
   queries: z.object({}),
 };

@@ -1,0 +1,108 @@
+<!-- Modal -->
+<div id="completeTaskModal" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50 p-4 transition-opacity duration-300">
+  <div id="completeModalContent" class="bg-white rounded-lg shadow-xl w-full max-w-4xl transform scale-95 transition-transform duration-300">
+    <form id="completeTaskForm" novalidate>
+      <div class="flex justify-between items-center p-4 border-b">
+        <h2 class="text-2xl font-bold text-gray-900">Completar Tarea</h2>
+        <button type="button" id="closeCompleteTaskModalBtn" class="text-gray-500 hover:text-gray-800 text-3xl font-light">&times;</button>
+      </div>
+
+      <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+        <div>
+          <label for="completeDescription" class="block text-sm font-medium text-gray-700">Descripción Final</label>
+          <textarea id="completeDescription" name="description" rows="4" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500" required></textarea>
+        </div>
+        <div>
+          <label for="completeImage" class="block text-sm font-medium text-gray-700">URL de Imagen (Opcional)</label>
+          <input type="text" id="completeImage" name="image" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+        </div>
+      </div>
+
+      <div class="flex justify-end items-center p-4 bg-gray-50 border-t rounded-b-lg gap-3">
+        <button type="button" id="cancelCompleteTaskBtn" class="bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors">Cancelar</button>
+        <button type="submit" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+//@ts-nocheck
+//modulo
+import taskCompletedModule from"./taskCompleted.module";
+import taskModule from "../task.module"
+
+function showModal(modalElement, contentElement) {
+  modalElement.classList.remove('hidden');
+  modalElement.classList.add('flex');
+  setTimeout(() => {
+    modalElement.style.opacity = '1';
+    contentElement.style.transform = 'scale(1)';
+  }, 10);
+}
+
+function hideModal(modalElement, contentElement) {
+  modalElement.style.opacity = '0';
+  contentElement.style.transform = 'scale(0.95)';
+  setTimeout(() => {
+    modalElement.classList.add('hidden');
+    modalElement.classList.remove('flex');
+  }, 300);
+}
+
+// Espera a que el botón esté disponible en el DOM
+function waitForElement(selector, callback) {
+  const el = document.querySelector(selector);
+  if (el) return callback(el);
+
+  const observer = new MutationObserver(() => {
+    const el = document.querySelector(selector);
+    if (el) {
+      observer.disconnect();
+      callback(el);
+    }
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+}
+
+const completeTaskModal = document.getElementById('completeTaskModal');
+const completeModalContent = document.getElementById('completeModalContent');
+const closeCompleteTaskModalBtn = document.getElementById('closeCompleteTaskModalBtn');
+const cancelCompleteTaskBtn = document.getElementById('cancelCompleteTaskBtn');
+const completeTaskForm = document.getElementById('completeTaskForm');
+
+// Espera el botón y lo enlaza
+waitForElement('#markCompletedBtn', (markCompletedBtn) => {
+  markCompletedBtn.addEventListener('click', () => showModal(completeTaskModal, completeModalContent));
+});
+
+closeCompleteTaskModalBtn.addEventListener('click', () => hideModal(completeTaskModal, completeModalContent));
+cancelCompleteTaskBtn.addEventListener('click', () => hideModal(completeTaskModal, completeModalContent));
+
+completeTaskModal.addEventListener('click', (event) => {
+  if (event.target === completeTaskModal) hideModal(completeTaskModal, completeModalContent);
+});
+
+completeTaskForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const finalDescription = document.getElementById('completeDescription').value;
+  const finalImage = document.getElementById('completeImage').value;
+  const activityId = Number(document.getElementById('modalActivityId').value);
+  // Aquí puedes enviar los datos a tu backend
+  await taskCompletedModule.completeTask({
+    description: finalDescription,
+    img: finalImage,
+    user_id:51951,
+    activity_id:activityId
+  });
+
+ await taskModule.updatetask({
+  id: activityId,
+  activity_status: 'completado'
+});
+
+  completeTaskForm.reset();
+  hideModal(completeTaskModal, completeModalContent);
+});
+</script>

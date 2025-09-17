@@ -46,10 +46,28 @@ const createCompletedTasksTable = async () => {
 
   console.log('Tabla de tareas completadas creada');
 };
+const incidenceTable = async () => {
+  await db.query('DROP TABLE IF EXISTS incidence');
+  await db.query(`
+    CREATE TABLE incidence   (
+    id SERIAL PRIMARY KEY,
+    description TEXT NOT NULL,
+    type TEXT NOT NULL,
+    till TEXT NOT NULL,
+    monto TEXT NOT NULL,
+    transsacion TEXT NOT NULL,
+    date TIMESTAMPTZ DEFAULT NOW(),
+    user_id INTEGER NOT NULL REFERENCES users(id_codigo) ON DELETE CASCADE
+    )
+  `);
+
+  console.log('Tabla de incidencia completadas creada');
+};
 
 const createTables = async () => {
   await createUsersTable();
   await createTasksTable();
+  await incidenceTable();
   await createCompletedTasksTable();
 
   console.log('Tablas creadas correctamente');

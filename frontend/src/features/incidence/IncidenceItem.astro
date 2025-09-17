@@ -1,0 +1,26 @@
+---
+const {id, description,type,monto,transsacion,date} = Astro.props;
+import { Icon } from 'astro-icon/components';
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+dayjs.extend(utc);
+dayjs.extend(timezone);
+const formattedDate = dayjs.utc(date).tz("America/Caracas").format("DD/MM/YYYY HH:mm");
+
+---
+<tr class="hover:bg-gray-50">
+            
+            <td class="p-4">{description}</td>
+            <td class="p-4">{type}</td>
+            <td class="p-4">{monto}</td>
+            <td class="p-4">{transsacion}</td>
+            <td class="p-4">{formattedDate}</td>
+           <td class="p-4" id="deleteBtn">
+            <button class="delete-btn w-8 h-8 flex justify-center items-center text-gray-600 hover:text-red-600">
+              <Icon name="mdi:delete-outline" class="w-6 h-6" is:inline/>
+            </button> 
+          </td>
+          </tr>
+
+

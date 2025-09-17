@@ -47,14 +47,14 @@ const { title } = Astro.props;
                         <div class="relative z-0 w-full mb-8 group">
                             <input 
                                 type="text" 
-                                name="codigo-usuario" 
-                                id="codigo-usuario"
+                                name="id_codigo" 
+                                id="id_codigo"
                                 class="block py-2.5 px-0 w-full text-lg text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer" 
                                 placeholder=" " 
                                 required 
                             />
                             <label 
-                                for="codigo-usuario" 
+                                for="id_codigo" 
                                 class="peer-focus:font-medium absolute text-lg text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
                             >
                                 Código de Usuario
@@ -64,14 +64,14 @@ const { title } = Astro.props;
                         <div class="relative z-0 w-full mb-10 group">
                             <input 
                                 type="password" 
-                                name="clave" 
-                                id="clave" 
+                                name="password" 
+                                id="password" 
                                 class="block py-2.5 px-0 w-full text-lg text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer" 
                                 placeholder=" " 
                                 required 
                             />
                             <label 
-                                for="clave" 
+                                for="password" 
                                 class="peer-focus:font-medium absolute text-lg text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
                             >
                                 Clave
@@ -100,7 +100,12 @@ const { title } = Astro.props;
 
         <script>
             // @ts-nocheck
-            document.addEventListener('DOMContentLoaded', () => {
+              import { BACK_ENDPOINT } from "../config/endpoints";
+              import AuthModule from "../features/auth/auth.module";
+              import { createNotification } from "../features/notifications/notificiation";
+              import ky from 'ky';
+
+     document.addEventListener('DOMContentLoaded', () => {
                 const loginForm = document.getElementById('loginForm');
                 const errorMessage = document.getElementById('errorMessage');
                 const menuToggle = document.getElementById('menuToggle');
@@ -141,6 +146,30 @@ const { title } = Astro.props;
                 });
             });
 
+
+  // DOM Element Selection
+  const form = document.querySelector('#loginForm');
+  const id_codigo = document.querySelector('#id_codigo');
+  const passwordInput = document.querySelector('#password');
+
+  // Form Submission
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    try {
+      await AuthModule.login({id_codigo: Number(id_codigo.value), passwordhash: passwordInput.value});
+      location.assign('/');
+    } catch (error) {
+      console.log(error);
+      
+      const errorData = await error?.response?.json();
+      createNotification({ 
+        title: 'Ups! Hubo un error', 
+        description: errorData?.error ?? 'Sin mensaje', 
+        type: 'error'
+      });
+    }  
+  });
 
 
         </script>

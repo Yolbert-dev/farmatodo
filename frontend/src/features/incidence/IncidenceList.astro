@@ -1,0 +1,148 @@
+---
+import UserItem from "./IncidenceItem.astro";
+import ky from "ky";
+import { BACK_ENDPOINT } from "../../config/endpoints";
+
+
+type User = {
+  id: string;
+  description: string;
+  type: string;
+  till: string;
+  monto: string;
+  transsacion: string;
+  date: string;
+};
+
+const usersData = await ky.get(`${BACK_ENDPOINT}/api/incidence`).json<User[]>();
+---
+
+<div class="flex gap-4 mb-4">
+  <input type="number" id="filterMonto" placeholder="Monto mínimo" class="border p-2 rounded" />
+  <input type="date" id="filterFecha" class="border p-2 rounded" />
+</div>
+
+<div class="max-h-130 overflow-y-auto border border-gray-300 rounded-md shadow-md">
+  <table id="tableUser" class="min-w-full">
+    <thead class="bg-gray-100">
+      <tr>
+      
+        <th class="p-4 text-left">Desciption</th>
+        <th class="p-4 text-left">Tipo</th>
+        <th class="p-4 text-left">Monto</th>
+        <th class="p-4 text-left">Nº Transsación</th>
+        <th class="p-4 text-left">Fecha</th>
+        <th class="p-4 text-left"></th>
+      </tr>
+    </thead>
+    <tbody id="users-list">
+  {[...usersData]
+  
+    .sort((a, b) => a.type.localeCompare(b.type))
+    .map(user => (
+      <UserItem 
+        key={user.id}
+        id={user.id}
+        description={user.description}
+        type={user.type}
+        monto={user.monto}
+        transsacion={user.transsacion}
+        date={user.date}
+         
+      />
+      
+  ))}
+  
+</tbody>
+  </table>
+</div>
+      <script>
+        // @ts-nocheck
+import incidenceModule from "./incidence.module";
+ import ky from "ky";
+ import { BACK_ENDPOINT } from "../../config/endpoints";
+ 
+   import dayjs from "dayjs";
+ import utc from "dayjs/plugin/utc";
+ import timezone from "dayjs/plugin/timezone";
+ dayjs.extend(utc);
+ dayjs.extend(timezone);
+
+  const filterMonto = document.querySelector("#filterMonto");
+  const filterFecha = document.querySelector("#filterFecha");
+  const usersList = document.querySelector("#users-list");
+
+
+  let usersData = [];
+
+  const fetchData = async () => {
+    usersData = await ky.get(`${BACK_ENDPOINT}/api/incidence`).json();
+    renderUsers(usersData);
+  };
+
+  const renderUsers = (data) => {
+    usersList.innerHTML = "";
+
+    data
+      .sort((a, b) => a.type.localeCompare(b.type))
+      .forEach(user => {
+        const row = document.createElement("tr");
+        const formattedDate = dayjs.utc(user.date).tz("America/Caracas").format("DD/MM/YYYY HH:mm");
+        row.innerHTML = `
+          <td class="p-4">${user.description}</td>
+          <td class="p-4">${user.type}</td>
+          <td class="p-4">${user.monto}</td>
+          <td class="p-4">${user.transsacion}</td>
+          <td class="p-4">${formattedDate}</td>
+            <td class="p-4">
+          <button class="delete-btn w-8 h-8 flex justify-center items-center text-gray-600 hover:text-red-600" data-id="${user.id}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </td>
+
+        `;
+        usersList.appendChild(row);
+      });
+  };
+
+  const applyFilters = () => {
+    const montoValue = parseFloat(filterMonto.value);
+    const fechaValue = filterFecha.value;
+
+    const filtered = usersData.filter(user => {
+      const userMonto = parseFloat(user.monto);
+      const userFecha = dayjs.utc(user.date).tz("America/Caracas").format("YYYY-MM-DD");
+
+      const montoMatch = isNaN(montoValue) || userMonto === montoValue;
+      const fechaMatch = !fechaValue || userFecha === fechaValue;
+
+      return montoMatch && fechaMatch;
+    });
+
+    renderUsers(filtered);
+  };
+
+  filterMonto.addEventListener("input", applyFilters);
+  filterFecha.addEventListener("input", applyFilters);
+
+  fetchData();
+          
+usersList.addEventListener("click", async (e) => {
+  const target = e.target.closest(".delete-btn");
+  if (!target) return;
+
+  const id = target.getAttribute("data-id");
+  if (!id) return;
+
+  try {
+    await incidenceModule.removeUser(id);
+    fetchData(); // Recarga la tabla sin refrescar la página
+  } catch (err) {
+    console.error("Error al eliminar incidencia:", err);
+    alert("No se pudo eliminar la incidencia.");
+  }
+});
+
+    </script>

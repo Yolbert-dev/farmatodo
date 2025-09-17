@@ -1,13 +1,14 @@
 import express from 'express';
 import taskRouter from './modules/task/task.routes.js';
+import taskCompletedRouter from './modules/taskCompleted/taskCompleted.routes.js';
 import { ZodError } from 'zod/v4';
 import { ErrorWithStatus } from './utils/errorTypes.js';
 import { DatabaseError } from 'pg';
 import cors from 'cors';
 import usersRouter from './modules/users/users.routes.js';
 import jwt from 'jsonwebtoken';
-import loginRoutes from './modules/login/login.routes.js';
-//import { authenticateUser } from './modules/auth/auth.middleware.js';
+import authRouter from './modules/auth/login.routes.js';
+import incidenceRouter from './modules/incidence/incidence.routes.js';
 import cookieParser from 'cookie-parser';
 const app = express();
 
@@ -20,8 +21,10 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/task', taskRouter);
+app.use('/api/taskCompleted', taskCompletedRouter);
+app.use('/api/incidence', incidenceRouter);
 app.use('/api/users', usersRouter);
-app.use('/api/login', loginRoutes);
+app.use('/api/auth', authRouter);
 
 app.use((err, req, res, _next) => {
   console.log(err);

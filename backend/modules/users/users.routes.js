@@ -9,6 +9,19 @@ usersRouter.get('/', async (req, res) => {
   res.json(users);
 });
 
+usersRouter.get('/count', async (req, res) => {
+  try {
+    // 1. Llama a la nueva función del repositorio
+    const count = await usersRepository.countAll();
+
+    // 2. Devuelve el conteo en el formato JSON esperado por el frontend
+    res.json({ count: count });
+  } catch (error) {
+    console.error('Error al contar usuarios:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+});
+
 usersRouter.post('/', async (req, res) => {
   try {
     // 1. Validar los datos de entrada
